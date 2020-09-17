@@ -7,25 +7,30 @@ import network
 import urequests
 import ujson
 
-def controleLed(status):
-    now = dt.time()
-    tm = dt.localtime(now)
-    msg = None
-    if status == 0:
-        msg = "STATUS: LED ON"
-        r.value(status)
-    else:
-        msg = "STATUS: LED OFF"
-        r.value(status)
-    return msg
 
-def SensorAmbiente():
-    for p in range(1,3):
-      sleep(1)
-    d.measure()
-    umidade = d.humidity()
-    temperatura = d.temperature()   
-    return [umidade,temperatura]
+endpoint_thingspeak = "https://api.thingspeak.com/update?api_key=EKX911IZ10C56N5V&field1={}&field2={}"
+
+class IoT(object):
+    @staticmethod
+    def controleLed(status):
+        now = dt.time()
+        tm = dt.localtime(now)
+        msg = None
+        if status == 0:
+            msg = "STATUS: LED ON"
+            r.value(status)
+        else:
+            msg = "STATUS: LED OFF"
+            r.value(status)
+        return msg
+    @staticmethod
+    def SensorAmbiente():
+        for p in range(1,3):
+          sleep(1)
+        d.measure()
+        umidade = d.humidity()
+        temperatura = d.temperature()   
+        return [umidade,temperatura]
 
 def connect_wifi(ssid, password):
     station = network.WLAN(network.STA_IF)
@@ -37,29 +42,24 @@ def connect_wifi(ssid, password):
         sleep(0.1)
     return station    
 
-def GenerateID():
-  reponse = None
-  try:
-    response = urequests.get("http://TintedNimbleCompilerbug--five-nine.repl.co/api/iot/v1/GENERATE_ID")
-    return response.json()
-  except:
-    return {"ID":"","dt":""} 
-
-def EnviarDadosSensores(data):
+class ThingsSpeak(object):
+  
+  @staticmethod 
+  def send(data):
       response = None
-      response = urequests.get("http://TintedNimbleCompilerbug--five-nine.repl.co/api/iot/v1/SEND?umidade={}&temperatura={}&relay_flag={}".format(
-                  data['umidade'],
+      try:
+        response = urequests.get(endpoint_thingspeak.format(
                   data['temperatura'],
-                  data['relay_flag'])).json()
+                  data['umidade'])).json()
+      except:
+        response = 0  
       return response
        
       
 def main():
-      station = connect_wifi("USSID","PASSWD")
-      response = GenerateID()
-      print(response)
+      station = connect_wifi("Juan_Oesteline","naomelembro")
       while station.isconnected():
-         umidade, temperatura = SensorAmbiente()
+         umidade, temperatura = IoT.SensorAmbiente()
          
          status = None
          if temperatura > 31 and umidade > 70:
@@ -67,11 +67,16 @@ def main():
          else:    
              status = 1
              
-         value = {"umidade":str(umidade),"temperatura":str(temperatura),"relay_flag":str(status)}
-         #print("value: ", value)
-         result = EnviarDadosSensores(value)
-         print("result: ",result)
-         print("Umidade: {}\tTemperatura: {} \tSTATUS_LED: {}".format(umidade, temperatura,controleLed(status)))
+         value = {"umidade":str(umidade),
+                  "temperatura":str(temperatura),
+                  "relay_flag":str(status)}
+         
+         result = ThingsSpeak.send(value)
+         
+         print("result: ","FAlha NO ENDPOINT" if result == 0 else result)
+         print("Umidade: {}\tTemperatura: {} \tSTATUS_LED: {}".format(umidade,
+                                                                      temperatura,
+                                                                      IoT.controleLed(status)))
          sleep(1)
          
           
