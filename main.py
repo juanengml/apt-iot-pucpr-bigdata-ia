@@ -11,6 +11,7 @@ import ujson
 endpoint_thingspeak = "https://api.thingspeak.com/update?api_key=EKX911IZ10C56N5V&field1={}&field2={}"
 
 class IoT(object):
+    
     @staticmethod
     def controleLed(status):
         now = dt.time()
@@ -23,6 +24,7 @@ class IoT(object):
             msg = "STATUS: LED OFF"
             r.value(status)
         return msg
+    
     @staticmethod
     def SensorAmbiente():
         for p in range(1,3):
@@ -32,18 +34,18 @@ class IoT(object):
         temperatura = d.temperature()   
         return [umidade,temperatura]
 
-def connect_wifi(ssid, password):
-    station = network.WLAN(network.STA_IF)
-    station.active(True)
-    station.connect(ssid,password)
-    for tentativa in range(50):
-        if station.isconnected():
-            break
-        sleep(0.1)
-    return station    
+    @staticmethod
+    def connect_wifi(ssid, password):
+        station = network.WLAN(network.STA_IF)
+        station.active(True)
+        station.connect(ssid,password)
+        for tentativa in range(50):
+            if station.isconnected():
+                break
+            sleep(0.1)
+        return station    
 
 class ThingsSpeak(object):
-  
   @staticmethod 
   def send(data):
       response = None
@@ -57,7 +59,7 @@ class ThingsSpeak(object):
        
       
 def main():
-      station = connect_wifi("Juan_Oesteline","naomelembro")
+      station = IoT.connect_wifi("Juan_Oesteline","naomelembro")
       while station.isconnected():
          umidade, temperatura = IoT.SensorAmbiente()
          
