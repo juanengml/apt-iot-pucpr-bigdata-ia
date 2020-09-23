@@ -27,13 +27,13 @@ class IoT(object):
     
     @staticmethod
     def SensorAmbiente():
-        for p in range(1,3):
+        for p in range(1,5):
           sleep(1)
         d.measure()
         umidade = d.humidity()
         temperatura = d.temperature()   
         return [umidade,temperatura]
-
+    
     @staticmethod
     def connect_wifi(ssid, password):
         station = network.WLAN(network.STA_IF)
@@ -46,6 +46,7 @@ class IoT(object):
         return station    
 
 class ThingsSpeak(object):
+  
   @staticmethod 
   def send(data):
       response = None
@@ -75,7 +76,7 @@ def main():
          
          result = ThingsSpeak.send(value)
          
-         print("result: ","FAlha NO ENDPOINT" if result == 0 else result)
+         print("result: ","FALHA NO ENDPOINT" if result == 0 else result)
          print("Umidade: {}\tTemperatura: {} \tSTATUS_LED: {}".format(umidade,
                                                                       temperatura,
                                                                       IoT.controleLed(status)))
@@ -86,6 +87,3 @@ if __name__== "__main__":
     r = machine.Pin(33,machine.Pin.OUT)
     d = DHT11(machine.Pin(32))
     main()
-    
-
-
