@@ -60,7 +60,7 @@ class ThingsSpeak(object):
        
       
 def main():
-      station = IoT.connect_wifi("Juan_Oesteline","naomelembro")
+      station = IoT.connect_wifi("Juan rede wifi","senha da wifi")
       while station.isconnected():
          umidade, temperatura = IoT.SensorAmbiente()
          
